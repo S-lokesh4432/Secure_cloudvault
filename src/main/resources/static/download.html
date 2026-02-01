@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Cloud Vault - Download</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Download File</h2>
+
+    <label>Enter File ID</label>
+    <input type="text" id="fileId" placeholder="Paste File ID here">
+
+    <button onclick="download()">Download</button>
+
+    <div class="info">
+        Download is allowed only after the unlock time.
+    </div>
+
+    <div class="footer">
+        Secure Cloud Vault
+    </div>
+</div>
+
+<script>
+function download() {
+    const id = document.getElementById("fileId").value;
+    if (!id) {
+        alert("Please enter File ID");
+        return;
+    }
+    window.location.href = "/download/" + id;
+}
+</script>
+
+</body>
+</html>

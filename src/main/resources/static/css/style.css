@@ -1,0 +1,83 @@
+* {
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    min-height: 100vh;
+}
+
+/* Center card */
+.container {
+    width: 420px;
+    margin: 80px auto;
+    background: #ffffff;
+    padding: 25px 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Headings */
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #1e3a8a;
+}
+
+/* Labels */
+label {
+    font-weight: 600;
+    margin-top: 10px;
+    display: block;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="file"],
+input[type="datetime-local"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+}
+
+/* Buttons */
+button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background: #2563eb;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #1e40af;
+}
+
+/* Info box */
+.info {
+    margin-top: 15px;
+    padding: 10px;
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    font-size: 14px;
+}
+
+/* Footer text */
+.footer {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+    color: #64748b;
+}

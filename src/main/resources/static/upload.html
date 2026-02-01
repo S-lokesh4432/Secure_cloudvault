@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Cloud Vault - Upload</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Secure Cloud Vault</h2>
+
+    <form action="/upload" method="post" enctype="multipart/form-data">
+
+        <label>Select File</label>
+        <input type="file" name="file" required>
+
+        <label>Unlock Time</label>
+        <input type="datetime-local" name="unlockTime" required>
+
+        <button type="submit">Upload File</button>
+    </form>
+
+    <div class="info">
+        Files are encrypted using AES and protected using RSA keys.
+    </div>
+
+    <div class="footer">
+        Secure Cloud Vault
+    </div>
+</div>
+
+</body>
+</html>

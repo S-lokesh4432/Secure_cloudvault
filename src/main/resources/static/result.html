@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Success</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>File Uploaded</h2>
+
+    <label>File ID</label>
+    <input type="text" id="fileId" readonly>
+
+    <button onclick="copyId()">Copy File ID</button>
+
+    <div class="info">
+        Save this File ID to download after unlock time.
+    </div>
+
+    <div class="footer">
+        <a href="/download.html">Go to Download</a> |
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("fileId").value = params.get("fileId");
+
+    function copyId() {
+        const input = document.getElementById("fileId");
+        input.select();
+        navigator.clipboard.writeText(input.value);
+        alert("File ID copied!");
+    }
+</script>
+
+</body>
+</html>
