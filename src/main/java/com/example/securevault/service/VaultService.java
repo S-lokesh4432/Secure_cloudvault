@@ -10,7 +10,10 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -29,6 +32,7 @@ public class VaultService {
     private static final Path RSA_PRIV = VAULT_DIR.resolve("rsa_private.key");
     private static final Path RSA_PUB  = VAULT_DIR.resolve("rsa_public.key");
 
+    // Input format from HTML datetime-local
     private static final DateTimeFormatter FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
@@ -48,8 +52,14 @@ public class VaultService {
 
         Files.createDirectories(VAULT_DIR);
 
-        LocalDateTime unlock = LocalDateTime.parse(unlockTime, FORMAT);
-        if (!unlock.isAfter(LocalDateTime.now())) {
+        // Parse user time (IST)
+        LocalDateTime userTime = LocalDateTime.parse(unlockTime, FORMAT);
+
+        // Convert IST → UTC Instant
+        ZonedDateTime istTime = userTime.atZone(ZoneId.of("Asia/Kolkata"));
+        Instant unlockInstant = istTime.toInstant();
+
+        if (!unlockInstant.isAfter(Instant.now())) {
             throw new IllegalArgumentException("Unlock time must be in the future");
         }
 
@@ -65,22 +75,26 @@ public class VaultService {
 
         byte[] data = file.getBytes();
 
+        // Generate AES key
         KeyGenerator kg = KeyGenerator.getInstance("AES");
         kg.init(256);
         SecretKey aesKey = kg.generateKey();
 
+        // Encrypt file with AES
         Cipher aesCipher = Cipher.getInstance("AES");
         aesCipher.init(Cipher.ENCRYPT_MODE, aesKey);
         Files.write(ENC_FILE, aesCipher.doFinal(data));
 
+        // Encrypt AES key with RSA
         PublicKey pub = loadPublicKey();
         Cipher rsa = Cipher.getInstance("RSA");
         rsa.init(Cipher.ENCRYPT_MODE, pub);
         Files.write(ENC_KEY, rsa.doFinal(aesKey.getEncoded()));
 
+        // Store UTC unlock time + original filename
         Files.writeString(
                 META,
-                unlock.toString() + "\n" + file.getOriginalFilename()
+                unlockInstant.toString() + "\n" + file.getOriginalFilename()
         );
 
         return fileId;
@@ -94,21 +108,27 @@ public class VaultService {
         Path ENC_KEY  = fileDir.resolve("aes.key.enc");
         Path META     = fileDir.resolve("meta.txt");
 
-        if (!Files.exists(ENC_FILE)) return null;
+        if (!Files.exists(ENC_FILE) || !Files.exists(META)) {
+            return null;
+        }
 
         String[] meta = Files.readString(META).split("\n");
-        LocalDateTime unlock = LocalDateTime.parse(meta[0]);
+        Instant unlockInstant = Instant.parse(meta[0]);
         String filename = meta.length > 1 ? meta[1] : "file";
 
-        if (LocalDateTime.now().isBefore(unlock)) return null;
+        // UTC-safe comparison (works on Render)
+        if (Instant.now().isBefore(unlockInstant)) {
+            return null;
+        }
 
+        // Decrypt AES key
         PrivateKey priv = loadPrivateKey();
-
         Cipher rsa = Cipher.getInstance("RSA");
         rsa.init(Cipher.DECRYPT_MODE, priv);
         byte[] aesKeyBytes = rsa.doFinal(Files.readAllBytes(ENC_KEY));
         SecretKey aesKey = new SecretKeySpec(aesKeyBytes, "AES");
 
+        // Decrypt file
         Cipher aes = Cipher.getInstance("AES");
         aes.init(Cipher.DECRYPT_MODE, aesKey);
         byte[] decrypted = aes.doFinal(Files.readAllBytes(ENC_FILE));
@@ -118,7 +138,7 @@ public class VaultService {
 
     // ================= RSA KEYS =================
     private void ensureRSAKeys() throws Exception {
-        if (Files.exists(RSA_PRIV)) return;
+        if (Files.exists(RSA_PRIV) && Files.exists(RSA_PUB)) return;
 
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
