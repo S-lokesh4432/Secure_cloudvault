@@ -1,6 +1,4 @@
-Got it 👍
-Here is **ONE clean `README.md` code block** with **live link + download link** included.
-You can **copy-paste this directly** into GitHub.
+
 
 ```md
 # 🔐 Secure Cloud Vault
